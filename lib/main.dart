@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_translation_app/HistoryPage.dart';
 import 'package:flutter_translation_app/TranslationObject.dart';
+import 'package:flutter_translation_app/persistence.dart';
 import 'package:flutter_translation_app/translateApi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,6 +15,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'UT Translator',
+      routes: {
+        '/history': (context) => HistoryPage(),
+      },
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -28,7 +34,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String inputText = "";
   String outputLanguage;
-  TranslationObject translation;
+  TranslationObject translationObject;
+  List<TranslationObject> previousTranslations = [];
+  SharedPreferences prefs;
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +71,55 @@ class _MainPageState extends State<MainPage> {
               ElevatedButton(
                 child: Text("Translate"),
                 onPressed: () async {
-
-                  translation = (await fetchTranslation(inputText, language: outputLanguage ?? 'et'));
-                  setState(() {});
+                  translationObject = (await fetchTranslation(inputText, language: outputLanguage ?? 'et'));
+                  translationObject.input = inputText;
+                  prefs.setString(DateTime.now().toString(), translationObject.result);
+                  setState(() {
+                    previousTranslations.add(translationObject);
+                  });
                 },
               ),
-              Text(translation?.result ?? "")
+              Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Text(translationObject?.result ?? ""),
+              ),
+              SizedBox(
+                height: 24,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 1,
+                color: Colors.grey,
+              ),
+              ElevatedButton(child: Text('History'), onPressed: () {
+                Navigator.of(context).pushNamed('/history');
+              },)
+
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class TranslationHistoryWidget extends StatelessWidget {
+  final TranslationObject translationObject;
+
+  const TranslationHistoryWidget({Key key, @required this.translationObject}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: [
+          Text(
+            'Input: ${translationObject.input}',
+            style: TextStyle(fontSize: 12),
+          ),
+          Text('Translation: ${translationObject.result}')
+        ],
       ),
     );
   }
