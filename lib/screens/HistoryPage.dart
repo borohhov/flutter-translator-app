@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_translation_app/TranslationObject.dart';
-import 'package:flutter_translation_app/firestore_api.dart';
-import 'package:flutter_translation_app/persistence.dart';
+import 'package:flutter_translation_app/models/TranslationObject.dart';
+import 'package:flutter_translation_app/database/firestore_api.dart';
+import 'package:flutter_translation_app/services/persistence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryPage extends StatelessWidget {
